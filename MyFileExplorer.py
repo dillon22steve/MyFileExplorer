@@ -9,53 +9,62 @@ class MyFileExplorer():
 
     def __init__(self, root):
 
+        root.geometry("800x400")
+        root.title("My File Explorer!")
+
+        #Creates the frame that will hold the tree storing the home directory
         homeDirFrame = ttk.Frame(root)
-        homeDirFrame.grid(row=2, column=0)
-        homeDirFrame.config(width=100, height=400)
+        homeDirFrame.place(x = 10, y = 55, width = 200, height = 300)
         homeDirFrame.config(relief=RIDGE)
 
+        #Creates the frame that will hold the tree storing the current directory
         currDirFrame = ttk.Frame(root)
-        currDirFrame.grid(row=2, column=1)
-        currDirFrame.config(width=500, height=400)
+        currDirFrame.place(x = 220, y = 55, width = 570, height = 300)
         currDirFrame.config(relief=RIDGE)
 
-
-        homeDirLabel = ttk.Label(root, text="Home Directory")
-        homeDirLabel.grid(row=1, column=0)
-        currDirLabel = ttk.Label(root, text="Current Directory")
-        currDirLabel.grid(row=1, column=1)
-
-
-        dirTextBox = Text(root, width = 50, height = 1)
-        dirTextBox.grid(row=0, column=0, columnspan=2)
+        
+        homeDirLabel = ttk.Label(root, text="Home Directory", font = ("Bookman Old Style", 10))
+        homeDirLabel.place(x = 50, y = 30, width = 125, height = 20)
+        currDirLabel = ttk.Label(root, text="Current Directory", font = ("Bookman Old Style", 10))
+        currDirLabel.place(x = 450, y = 30, width = 150, height = 20)
 
 
+        #The text box that displays the directory path to the user so they can copy it
+        dirTextBox = Text(root, font = ("Bookman Old Style", 10))
+        dirTextBox.place(x = 100, y = 5, width = 600, height = 20)
+
+
+        #Initializes the current directory to the user's home directory and inserts that directory
+        #into the text box
         homeDir = os.path.expanduser("~")
         os.chdir(homeDir)
         currDir = os.getcwd()
         dirTextBox.insert('1.0', currDir)
 
 
-        folder = PhotoImage("FileFolder.gif").subsample(5, 5)
+        #folder = PhotoImage(file = 'C:\\Users\\dillo\\Documents\GitHub\\MyFileExplorer\\FileFolder2.gif').subsample(50, 50)
+        folder = PhotoImage(file = 'C:\\Users\\dillo\\Documents\GitHub\\MyFileExplorer\\FileFolder2.gif')
+        fileImg = PhotoImage(file = 'C:\\Users\\dillo\\Documents\GitHub\\MyFileExplorer\\File.gif')
+
 
 
         homeDirTree = ttk.Treeview(homeDirFrame)
-        homeDirTree.grid(row=0, column=0, rowspan=10)
+        homeDirTree.place(x = 0, y = 0, width = 190, height = 300)
         homeDirTree.config(selectmode="browse")
 
         hdtScrollbar = ttk.Scrollbar(homeDirFrame, orient="vertical", command=homeDirTree.yview)
-        hdtScrollbar.grid(row=0, column=1, rowspan=10, sticky='ns')
+        hdtScrollbar.place(x = 190, y = 0, width = 10, height = 300)
         homeDirTree.config(yscrollcommand = hdtScrollbar.set)
 
 
 
 
         currDirTree = ttk.Treeview(currDirFrame)
-        currDirTree.grid(row=0, column=0, rowspan=10)
+        currDirTree.place(x = 0, y = 0, width = 560, height = 300)
         currDirTree.config(selectmode='browse')
 
         cdtScrollbar = ttk.Scrollbar(currDirFrame, orient="vertical", command=currDirTree.yview)
-        cdtScrollbar.grid(row=0, column=1, rowspan=10, sticky='ns')
+        cdtScrollbar.place(x = 560, y = 0, width = 10, height = 300)
         currDirTree.config(yscrollcommand = cdtScrollbar.set)
 
 
@@ -63,18 +72,15 @@ class MyFileExplorer():
         def initHomeDir():
             i = 0
             for file in os.scandir(homeDir):
-                if file.is_dir:
-                    fileName = file.name
-                    homeDirTree.insert('', 'end', i, text=fileName, image=folder)
+                fileName = file.name
+                path = homeDir + "\\" + file.name
+                    
+                if os.path.isdir(path):
+                    homeDirTree.insert('', i, i, text = fileName, image = folder)
                     i = i + 1
                 else:
-                    fileName = file.name
-                    homeDirTree.insert('', 'end', i, text=fileName)
+                    homeDirTree.insert('', 'end', i, text=fileName, image = fileImg)
                     i = i + 1
-
-            desktop = currDir + "\\Desktop"
-            replaceCurrDirTree(desktop)
-            os.chdir(desktop)
 
 
 
@@ -99,11 +105,12 @@ class MyFileExplorer():
             else:
                 nextDir = currDir + "\\" + fileName
                 os.chdir(nextDir)
+                currDir = os.getcwd()
 
                 replaceCurrDirTree(nextDir)
 
                 dirTextBox.delete('1.0', '1.0 lineend')
-                dirTextBox.insert('1.0', nextDir)
+                dirTextBox.insert('1.0', currDir)
         
         def replaceCurrDirTree(newDir):
             for item in currDirTree.get_children():
@@ -111,13 +118,13 @@ class MyFileExplorer():
 
             i = 0
             for file in os.scandir(newDir):
-                if file.is_dir:
-                    fileName = file.name
+                fileName = file.name
+                path = newDir + "\\" + fileName
+                if os.path.isdir(path):
                     currDirTree.insert('', 'end', i, text=fileName, image=folder)
                     i = i + 1
                 else:
-                    fileName = file.name
-                    currDirTree.insert('', 'end', i, text=fileName)
+                    currDirTree.insert('', 'end', i, text=fileName, image=fileImg)
                     i = i + 1
 
 
@@ -127,12 +134,6 @@ class MyFileExplorer():
 
         homeDirTree.bind('<<TreeviewSelect>>', updateHomeDirTree)
         currDirTree.bind('<<TreeviewSelect>>', updateCurrDirTree)
-
-
-        homeDirFrame.rowconfigure(10, weight = 1)
-        homeDirFrame.columnconfigure(2, weight = 1)
-        currDirFrame.rowconfigure(10, weight=1)
-        currDirFrame.columnconfigure(2, weight=1)
 
 
         def createNewFile():
