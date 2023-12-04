@@ -158,10 +158,59 @@ class MyFileExplorer():
         currDirTree.bind('<<TreeviewSelect>>', updateCurrDirTree)
 
 
+        #This entry widget will be used to allow the user to enter the name of the
+        #file or folder they want to create.
+        foldFileName = StringVar()
+        foldFileEntry = ttk.Entry(root, textvariable = foldFileName)
+        foldLabel = ttk.Label(root, image = folder)
+        fileLabel = ttk.Label(root, image = fileImg)
+
+        def addFileToDir(event):
+            with open(foldFileEntry.get(), 'w') as fp:
+                pass 
+                fp.write("")
+
+            resetFoldFileEntry(False)
         def createNewFile():
-            print("Created new file")
+            #Make the label and entry visible to the user.
+            fileLabel.place(x = 220, y = 360, width = 25, height = 20)
+            foldFileEntry.place(x = 250, y = 360, width = 120, height = 20)
+
+            foldFileEntry.bind('<Return>', addFileToDir)
+
+
+        #Retrieves the text from the entry widget, appends it to the current
+        #working directory, and adds a new directory using that path.
+        def addDirToTree(event):
+            #Make the new directory
+            newFolderPath = os.getcwd() + "\\" + foldFileEntry.get()
+            mode = 0o666
+            os.mkdir(newFolderPath, mode)
+
+            resetFoldFileEntry(True)
         def createNewFolder():
-            print("New folder")
+            #Make the label and entry visible to the user.
+            foldLabel.place(x = 220, y = 360, width = 25, height = 20)
+            foldFileEntry.place(x = 250, y = 360, width = 120, height = 20)
+
+            #Create the directory after the user enters a folder name
+            foldFileEntry.bind('<Return>', addDirToTree)
+
+
+        def resetFoldFileEntry(isFolder):
+            #Delete the user's text in the entry.
+            foldFileEntry.delete(0, END)
+
+            #Make the label and entry invisible to the user until the next time
+            #they click New Folder.
+            foldFileEntry.place_forget()
+            if (isFolder):
+                foldLabel.place_forget()
+            else:
+                fileLabel.place_forget()
+
+            #replace the currDirTree so the new directory will be displayed
+            replaceCurrDirTree(os.getcwd())
             
 
 
