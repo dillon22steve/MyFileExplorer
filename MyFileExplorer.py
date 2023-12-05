@@ -129,6 +129,7 @@ class MyFileExplorer():
                 dirTextBox.delete('1.0', '1.0 lineend')
                 dirTextBox.insert('1.0', currDir)
         
+
         #Updates the tree to display the new directories files and subdirectories
         def replaceCurrDirTree(newDir):
             #Deletes the current contents of the tree.
@@ -149,6 +150,11 @@ class MyFileExplorer():
                     i = i + 1
 
 
+        def cdToParent():
+            os.chdir("..")
+            replaceCurrDirTree(os.getcwd())
+        parentDirBtn = ttk.Button(root, text = "Parent Directory", command = cdToParent)
+        parentDirBtn.place(x = 220, y = 360, width = 100, height = 25)
 
 
         initHomeDir()
